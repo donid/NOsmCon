@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyVersion>0.0.1</AssemblyVersion>
+    <FileVersion>0.0.1</FileVersion>
+    <Copyright>https://github.com/donid</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="protobuf-net" Version="3.2.16" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="OsmSharp">
+      <HintPath>..\OsmSharp_netstandard2.0\OsmSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
