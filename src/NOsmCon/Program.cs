@@ -39,8 +39,13 @@ internal class Program
 		string outFilePath = options.OutputFile;
 		OsmFileFormat outputFormat = options.OutputFormat;
 		bool completeWays = options.CompleteWays;
-		string[] boundingBoxParts = options.BoundingBox.Split(',');
-		float[] boundingBoxFloats = boundingBoxParts.Select(x => float.Parse(x, CultureInfo.InvariantCulture)).ToArray();
+
+		string parseError = ParseBoundingBox(options.BoundingBox, out float[] boundingBoxFloats);
+		if (parseError != "")
+		{
+			Console.WriteLine(parseError);
+			return;
+		}
 		float bBoxLeft = Math.Min(boundingBoxFloats[0], boundingBoxFloats[1]);
 		float bBoxRight = Math.Max(boundingBoxFloats[0], boundingBoxFloats[1]);
 		float bBoxBottom = Math.Min(boundingBoxFloats[2], boundingBoxFloats[3]);
@@ -79,6 +84,44 @@ internal class Program
 		}
 		Console.WriteLine("Extract completed!");
 	}
+
+	private static string ParseBoundingBox(string boundingBox, out float[] parsedValues)
+	{
+		string[] boundingBoxParts = boundingBox.Split(',');
+		if (boundingBoxParts.Length != 4)
+		{
+			parsedValues = new float[0];
+			return "The BoundingBox argument does not contain four comma-separated values.";
+		}
+		parsedValues = new float[4];
+		for (int index = 0; index < boundingBoxParts.Length; index++)
+		{
+			float range = index < 2 ? 180 : 90;
+			string errorMessage = ParseBoundingBoxValue(boundingBoxParts[index], range, out float value);
+			if (errorMessage != "")
+			{
+				return $"The BoundingBox argument value #{index + 1} {errorMessage}.";
+			}
+			parsedValues[index] = value;
+		}
+		return "";
+	}
+
+	private static string ParseBoundingBoxValue(string stringValue, float range, out float value)
+	{
+		if (float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsedValue))
+		{
+			value = parsedValue;
+			if (value >= range || value <= -range)
+			{
+				return "does not fall in the range +/-" + range;
+			}
+			return "";
+		}
+		value = 0f;
+		return "cannot be parsed as float";
+	}
+
 	private static string ToInvariantString(float bBoxLeft)
 	{
 		return bBoxLeft.ToString(CultureInfo.InvariantCulture);
