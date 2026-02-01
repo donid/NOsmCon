@@ -25,7 +25,7 @@ jobs:
    # - name: Test
     #  run: dotnet test --no-build --verbosity normal
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4.0.0
       with:
         name: upload debug-build artifacts
         path: src\NOsmCon\bin\Release\net10.0
