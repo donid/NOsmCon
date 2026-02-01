@@ -40,7 +40,12 @@ internal class Program
 		OsmFileFormat outputFormat = options.OutputFormat;
 		bool completeWays = options.CompleteWays;
 
-		string parseError = ParseBoundingBox(options.BoundingBox, out float[] boundingBoxFloats);
+        if (string.IsNullOrEmpty(options.BoundingBox))
+        {
+            Console.WriteLine("The BoundingBox argument is null or empty");
+            return;
+        }
+        string parseError = ParseBoundingBox(options.BoundingBox, out float[] boundingBoxFloats);
 		if (parseError != "")
 		{
 			Console.WriteLine(parseError);
@@ -68,14 +73,33 @@ internal class Program
 			Console.WriteLine("SourceFile not found!");
 			return;
 		}
+
 		FileInfo outFile = new FileInfo(outFilePath);
+		DirectoryInfo? outDirectory = outFile.Directory;
+		if (outDirectory == null || outDirectory.Exists == false)
+		{
+			Console.WriteLine("Directory for OutputFile not found!");
+			return;
+		}
 
 		FileStream sourceStream = sourceFile.OpenRead();
 		OsmStreamSource source = CreateStreamSource(sourceStream, sourceFormat);
 
 		var filtered = source.FilterBox(bBoxLeft, bBoxTop, bBoxRight, bBoxBottom, completeWays);
 
-		using (var outStream = outFile.Open(FileMode.Create, FileAccess.ReadWrite))
+		FileStream outStream;
+		try
+		{
+			outStream = outFile.Open(FileMode.Create, FileAccess.ReadWrite);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Error creating OutputFile: " + ex.Message);
+			return;
+
+		}
+
+		using (outStream)
 		{
 			OsmStreamTarget target = CreateStreamTarget(outStream, outputFormat);
 			target.RegisterSource(filtered);
